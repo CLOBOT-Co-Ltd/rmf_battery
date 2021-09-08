@@ -28,6 +28,11 @@ find_package(rmf_traffic REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(ament_cmake_catch2 QUIET)
 find_package(rmf_cmake_uncrustify QUIET)
+if(DEFINED ENV{CLOBER_RMF}) # clober
+  find_package(rmf_traffic_msgs REQUIRED)
+  find_package(rmf_fleet_msgs REQUIRED)
+  find_package(rclcpp REQUIRED)
+endif()
 
 # ===== Battery modelling library
 file(GLOB_RECURSE core_lib_srcs "src/rmf_battery/*.cpp")
@@ -48,31 +53,33 @@ target_include_directories(rmf_battery
     ${EIGEN3_INCLUDE_DIRS}
 )
 
-if(BUILD_TESTING AND ament_cmake_catch2_FOUND AND rmf_cmake_uncrustify_FOUND)
+if(NOT DEFINED ENV{CLOBER_RMF}) # clober
+  if(BUILD_TESTING AND ament_cmake_catch2_FOUND AND rmf_cmake_uncrustify_FOUND)
 
-  file(GLOB_RECURSE unit_test_srcs "test/*.cpp")
+    file(GLOB_RECURSE unit_test_srcs "test/*.cpp")
 
-  ament_add_catch2(
-    test_rmf_battery test/main.cpp ${unit_test_srcs}
-    TIMEOUT 300)
-  target_link_libraries(test_rmf_battery
-      rmf_battery
-  )
+    ament_add_catch2(
+      test_rmf_battery test/main.cpp ${unit_test_srcs}
+      TIMEOUT 300)
+    target_link_libraries(test_rmf_battery
+        rmf_battery
+    )
 
-  target_include_directories(test_rmf_battery
-    PRIVATE
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/>
-  )
+    target_include_directories(test_rmf_battery
+      PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/>
+    )
 
-  find_file(uncrustify_config_file
-    NAMES "rmf_code_style.cfg"
-    PATHS "${rmf_utils_DIR}/../../../share/rmf_utils/")
+    find_file(uncrustify_config_file
+      NAMES "rmf_code_style.cfg"
+      PATHS "${rmf_utils_DIR}/../../../share/rmf_utils/")
 
-  rmf_uncrustify(
-    ARGN include src test
-    CONFIG_FILE ${uncrustify_config_file}
-    MAX_LINE_LENGTH 80
-  )
+    rmf_uncrustify(
+      ARGN include src test
+      CONFIG_FILE ${uncrustify_config_file}
+      MAX_LINE_LENGTH 80
+    )
+  endif()
 endif()
 
 # Create cmake config files

@@ -11,7 +11,9 @@
 
   <build_depend>rmf_utils</build_depend>
   <build_export_depend>rmf_utils</build_export_depend>
-
+  <build_depend condition="$CLOBER_RMF == 1">rmf_traffic_msgs</build_depend>
+  <build_depend condition="$CLOBER_RMF == 1">rmf_fleet_msgs</build_depend>
+  
   <depend>rmf_traffic</depend>
   
   <test_depend>ament_cmake_catch2</test_depend>
